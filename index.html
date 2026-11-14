@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SENTINEL HOME | Interactive IoT Simulation</title>
+<style>
+:root{--bg:#08111d;--panel:#101d2b;--panel2:#142538;--line:#263b50;--text:#eaf3fb;--muted:#91a7bb;--green:#31d18a;--yellow:#f4c44e;--red:#ff5f67;--blue:#59b8ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 45% -10%,#1a3550 0,#08111d 52%);color:var(--text);font:14px/1.45 Inter,ui-sans-serif,system-ui,Segoe UI,Arial,sans-serif}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:17px 22px;border-bottom:1px solid #26394c;background:#091522e8;position:sticky;top:0;z-index:5;backdrop-filter:blur(12px)}
+.brand{display:flex;align-items:center;gap:12px}.mark{width:40px;height:40px;border:1px solid #39729a;border-radius:12px;display:grid;place-items:center;color:#7bd0ff;background:#102a40;font-size:20px}.brand h1{font-size:17px;letter-spacing:2px;margin:0}.brand p{margin:2px 0 0;color:var(--muted);font-size:11px}
+.topstatus{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.pill{border:1px solid var(--line);background:#102031;padding:7px 10px;border-radius:99px;color:#c8d8e6;font-size:11px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:6px;box-shadow:0 0 10px currentColor}
+main{padding:18px;max-width:1600px;margin:auto}.intro{display:flex;justify-content:space-between;align-items:end;gap:16px;margin:2px 0 15px}.intro h2{font-size:21px;margin:0 0 4px}.intro p{color:var(--muted);margin:0;font-size:12px}.layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(310px,.85fr);gap:15px}
+.panel{background:linear-gradient(145deg,#122235,#0e1a28);border:1px solid var(--line);border-radius:15px;overflow:hidden;box-shadow:0 12px 35px #0003}.panelhead{padding:12px 15px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px}.panelhead strong{font-size:12px;letter-spacing:1.1px}.panelhead small{color:var(--muted);font-size:10px}.scene-wrap{position:relative;min-height:570px;height:calc(100vh - 245px);max-height:780px;background:radial-gradient(ellipse at 50% 55%,#1a3447,#08131f 72%)}#scene{width:100%;height:100%;display:block;min-height:570px}
+.overlay{position:absolute;left:14px;top:14px;display:flex;gap:7px;flex-wrap:wrap;max-width:75%;pointer-events:none}.overlay span{font-size:10px;color:#cde4f6;background:#0b1b2bcf;border:1px solid #35536d;padding:6px 8px;border-radius:7px}
+.legend{position:absolute;bottom:13px;left:14px;display:flex;gap:12px;color:#b7c9d8;font-size:10px;background:#091522cc;padding:8px 10px;border-radius:8px}.legend i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}
+.side{display:flex;flex-direction:column;gap:15px}.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:12px}.stat{background:#0b1825;border:1px solid #20374b;border-radius:10px;padding:11px}.stat label{display:block;color:var(--muted);font-size:10px}.stat b{display:block;font-size:19px;margin-top:3px}.stat em{font-style:normal;color:var(--green);font-size:10px}
+.device-list{padding:9px 12px}.device{display:grid;grid-template-columns:10px 1fr auto;gap:10px;align-items:center;padding:10px 3px;border-bottom:1px solid #203348}.device:last-child{border:0}.device .led{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 9px currentColor}.device b{display:block;font-size:11px}.device small{display:block;color:var(--muted);font-size:10px}.state{font-size:9px;color:var(--green);border:1px solid #246347;padding:4px 6px;border-radius:6px;white-space:nowrap}.state.warn{color:var(--yellow);border-color:#715e29}.state.alert{color:var(--red);border-color:#74333a}
+.controls{padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px}.btn{background:#172c40;border:1px solid #35516a;color:#e6f4ff;border-radius:8px;padding:9px 10px;font-size:11px;cursor:pointer;transition:.18s}.btn:hover{background:#21425d;border-color:#5aa9d7}.btn.primary{background:#164b6b;border-color:#267ba9}.btn.danger{border-color:#783941;color:#ffb2b5}.btn.full{grid-column:1/-1}.readings{padding:11px 13px;display:grid;grid-template-columns:1fr 1fr;gap:9px}.reading{background:#0b1825;border-radius:8px;padding:9px;border:1px solid #203448}.reading span{display:block;color:var(--muted);font-size:9px}.reading b{font-size:15px}.log{padding:10px 13px;max-height:180px;overflow:auto}.event{font-size:10px;padding:7px 0;border-bottom:1px solid #203448;color:#c5d6e4}.event time{color:#708ba2;margin-right:8px}.event.alert{color:#ff9ca2}.event.warn{color:#f2d27d}
+.arch{padding:12px 14px;color:#a9bfd1;font-size:10px;line-height:1.8}.arch strong{color:#e5f4ff}.arch .arrow{color:#58b8ed;padding:0 4px}
+footer{padding:16px 20px;color:#6f879d;text-align:center;font-size:10px}
+@media(max-width:950px){.layout{grid-template-columns:1fr}.scene-wrap{height:62vh;min-height:460px}.side{display:grid;grid-template-columns:1fr 1fr}.side .panel:first-child{grid-column:1/-1}}
+@media(max-width:600px){header{padding:12px}.topstatus .pill:nth-child(2){display:none}main{padding:10px}.intro{align-items:start;flex-direction:column}.side{display:flex}.scene-wrap{height:500px;min-height:500px}#scene{min-height:500px}.brand h1{font-size:14px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand"><div class="mark">⌂</div><div><h1>SENTINEL HOME</h1><p>IoT-BASED SMART HOME · LIVE SYSTEM SIMULATION</p></div></div>
+ <div class="topstatus"><span class="pill"><i class="dot"></i> SYSTEM ONLINE</span><span class="pill">MQTT · ACTIVE</span><span class="pill" id="clock">--:--:--</span></div>
+</header>
+<main>
+ <div class="intro"><div><h2>Smart Home Command Centre</h2><p>Four independent ESP32 subsystems reporting to a central Raspberry Pi 4 hub.</p></div><span class="pill">SIMULATION MODE · NOT CONNECTED TO PHYSICAL HARDWARE</span></div>
+ <div class="layout">
+  <section class="panel">
+   <div class="panelhead"><strong>LIVE 3D HOUSE MODEL</strong><small>Drag to orbit · Scroll to zoom · Right-click to pan</small></div>
+   <div class="scene-wrap"><canvas id="scene"></canvas><div class="overlay"><span>01 · DOOR SECURITY</span><span>02 · SMOKE & FLAME</span><span>03 · RAIN DETECTION</span><span>04 · NIGHT SECURITY</span></div><div class="legend"><span><i style="background:#31d18a"></i>Normal</span><span><i style="background:#f4c44e"></i>Warning</span><span><i style="background:#ff5f67"></i>Critical</span><span><i style="background:#59b8ff"></i>Wi-Fi / MQTT</span></div></div>
+  </section>
+  <aside class="side">
+   <section class="panel"><div class="panelhead"><strong>NETWORK OVERVIEW</strong><small>Central hub</small></div><div class="stats">
+    <div class="stat"><label>ESP32 DEVICES</label><b id="online">4/4</b><em>All connected</em></div>
+    <div class="stat"><label>RASPBERRY PI 4</label><b style="font-size:16px">CONNECTED</b><em>MQTT bridge active</em></div>
+    <div class="stat"><label>ACTIVE ALERTS</label><b id="alertcount">0</b><em id="alertnote">No critical events</em></div>
+    <div class="stat"><label>UPTIME</label><b id="uptime">00:00</b><em>Simulation session</em></div>
+   </div></section>
+   <section class="panel"><div class="panelhead"><strong>SUBSYSTEM STATUS</strong><small>Independent controllers</small></div><div class="device-list" id="devices">
+    <div class="device"><i class="led"></i><div><b>ESP32-01 · Door Security</b><small>HC-SR04 · LED · Buzzer</small></div><span class="state" id="s-door">SAFE</span></div>
+    <div class="device"><i class="led"></i><div><b>ESP32-02 · Smoke & Flame</b><small>MQ-2 · Flame sensor</small></div><span class="state" id="s-fire">NORMAL</span></div>
+    <div class="device"><i class="led"></i><div><b>ESP32-03 · Rain Detection</b><small>Rain / water sensor</small></div><span class="state" id="s-rain">DRY</span></div>
+    <div class="device"><i class="led"></i><div><b>ESP32-04 · Night Security</b><small>Night monitoring node</small></div><span class="state" id="s-night">MONITORING</span></div>
+   </div></section>
+   <section class="panel"><div class="panelhead"><strong>SIMULATION CONTROLS</strong><small>Trigger test events</small></div><div class="controls">
+    <button class="btn" onclick="trigger('door')">Person approaches door</button><button class="btn" onclick="trigger('fire')">Smoke detected</button>
+    <button class="btn" onclick="trigger('flame')">Flame detected</button><button class="btn" onclick="trigger('rain')">Start rainfall</button>
+    <button class="btn" onclick="trigger('night')">Suspicious activity</button><button class="btn" onclick="trigger('clear')">Reset all events</button>
+    <button class="btn primary full" onclick="toggleNight()">Toggle day / night scene</button>
+   </div></section>
+   <section class="panel"><div class="panelhead"><strong>LIVE SENSOR TELEMETRY</strong><small>Illustrative simulated values</small></div><div class="readings">
+    <div class="reading"><span>DOOR DISTANCE</span><b id="distance">-- cm</b></div><div class="reading"><span>MQ-2 RAW VALUE</span><b id="gas">420</b></div>
+    <div class="reading"><span>FLAME SENSOR</span><b id="flame">CLEAR</b></div><div class="reading"><span>RAIN SENSOR</span><b id="rainval">DRY · 0%</b></div>
+    <div class="reading"><span>NIGHT ACTIVITY</span><b id="activity">NONE</b></div><div class="reading"><span>LAST MQTT EVENT</span><b id="lastmsg">HEARTBEAT</b></div>
+   </div></section>
+   <section class="panel"><div class="panelhead"><strong>EVENT STREAM</strong><small>Local simulation log</small></div><div class="log" id="log"><div class="event"><time>BOOT</time> Raspberry Pi 4 connected · MQTT broker active</div><div class="event"><time>BOOT</time> Four ESP32 nodes online and publishing status</div></div></section>
+  </aside>
+ </div>
+ <section class="panel" style="margin-top:15px"><div class="panelhead"><strong>COMMUNICATION ARCHITECTURE</strong><small>Logical data path</small></div><div class="arch"><strong>ESP32-01</strong> · <strong>ESP32-02</strong> · <strong>ESP32-03</strong> · <strong>ESP32-04</strong><span class="arrow">→ Wi-Fi →</span><strong>MQTT Broker</strong><span class="arrow">→</span><strong>Raspberry Pi 4 Model B</strong><span class="arrow">→</span><strong>Central Dashboard</strong><br>Each ESP32 independently reads its own sensors and publishes subsystem status. The Raspberry Pi receives and aggregates MQTT messages; it does not replace the ESP32 controllers. This page is a visual simulation and does not connect to real devices.</div></section>
+</main>
+<footer>SENTINEL HOME · B.Tech CSE Engineering Demonstration · Interactive browser simulation · Sensor values are illustrative, not physical measurements.</footer>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+
+const canvas=document.querySelector('#scene');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(canvas.clientWidth,canvas.clientHeight,false);
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.22;
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x081522);
+scene.fog=new THREE.Fog(0x081522,32,65);
+const camera=new THREE.PerspectiveCamera(37,canvas.clientWidth/canvas.clientHeight,.1,120);
+camera.position.set(16,12,19);
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.target.set(0,3.0,0); controls.enableDamping=true; controls.dampingFactor=.055;
+controls.minDistance=10; controls.maxDistance=35; controls.maxPolarAngle=Math.PI*.49;
+
+scene.add(new THREE.HemisphereLight(0xd9edff,0x46515a,2.1));
+const sun=new THREE.DirectionalLight(0xffe3c5,3.4);
+sun.position.set(-10,19,13); sun.castShadow=true;
+sun.shadow.mapSize.set(4096,4096); sun.shadow.camera.left=-18;sun.shadow.camera.right=18;sun.shadow.camera.top=18;sun.shadow.camera.bottom=-18;sun.shadow.bias=-.0002;
+scene.add(sun);
+const fill=new THREE.DirectionalLight(0x8bcaff,1.5);fill.position.set(12,9,-10);scene.add(fill);
+const interiorLight=new THREE.PointLight(0xffd6a0,30,24);interiorLight.position.set(0,5,0);scene.add(interiorLight);
+
+const M=(c,r=.65,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
+const concrete=M(0x9caab2,.85), plaster=M(0xe6e5dc,.88), plasterDark=M(0xbfcbd0,.8),
+ roofMat=M(0x283c4c,.48,.35), roofEdge=M(0x536675,.4,.45), wood=M(0x77513a,.65),
+ oak=M(0xb78b5d,.65), glass=new THREE.MeshPhysicalMaterial({color:0x8bc9e2,roughness:.1,metalness:.05,transparent:true,opacity:.27,transmission:.35,thickness:.15}),
+ metal=M(0x84939c,.28,.8), black=M(0x111b24,.35,.3), greenPCB=M(0x087b5c,.5,.15),
+ chip=M(0x18212b,.3,.35), gold=M(0xd8b45f,.28,.65), lawn=M(0x315b42,.95),
+ tile=M(0x596e7d,.8), red=M(0xe34e50,.35), blue=M(0x55bfff,.3);
+function mesh(parent,geo,mat,x=0,y=0,z=0,cast=true){
+ const o=new THREE.Mesh(geo,mat);o.position.set(x,y,z);o.castShadow=cast;o.receiveShadow=true;parent.add(o);return o;
+}
+function box(parent,x,y,z,w,h,d,mat,cast=true){return mesh(parent,new THREE.BoxGeometry(w,h,d),mat,x,y,z,cast)}
+function cyl(parent,x,y,z,r,h,mat,axis='y'){
+ const o=mesh(parent,new THREE.CylinderGeometry(r,r,h,24),mat,x,y,z);
+ if(axis==='z')o.rotation.x=Math.PI/2; if(axis==='x')o.rotation.z=Math.PI/2; return o;
+}
+function line(parent,pts,color=0x4c91ae,r=.025){
+ const curve=new THREE.CatmullRomCurve3(pts.map(p=>new THREE.Vector3(...p)));
+ return mesh(parent,new THREE.TubeGeometry(curve,32,r,8,false),M(color,.5,.2),0,0,0,false);
+}
+function label(text,scale=1){
+ const c=document.createElement('canvas');c.width=768;c.height=144;
+ const ctx=c.getContext('2d');ctx.fillStyle='#071725';ctx.fillRect(0,0,768,144);
+ ctx.strokeStyle='#68b8df';ctx.lineWidth=5;ctx.strokeRect(3,3,762,138);
+ ctx.fillStyle='#e9f6ff';ctx.font='bold 42px Arial';ctx.textAlign='center';ctx.fillText(text,384,91);
+ const tex=new THREE.CanvasTexture(c);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:true}));
+ sp.scale.set(3.3*scale,.62*scale,1);return sp;
+}
+
+// Exhibition plinth and landscaped miniature plot
+const plot= new THREE.Group();scene.add(plot);
+box(plot,0,-.48,0,19,.75,15,M(0x17222c,.4,.35));
+box(plot,0,-.08,0,18.7,.12,14.7,concrete);
+box(plot,0,.01,0,17.8,.08,13.8,lawn);
+box(plot,0,.12,0,13.4,.18,9.2,concrete);
+box(plot,0,.23,0,12.9,.12,8.8,M(0x777f83));
+for(let x=-8;x<=8;x+=.5)box(plot,x,.015,6.5,.025,.025,.025,gold,false);
+const house=new THREE.Group();plot.add(house);
+
+// Ground-floor footprint 12 x 8. Front is +Z and is deliberately cut away for presentation.
+const W=12,D=8,front=4;
+box(house,0,.43,0,W,.34,D,concrete);
+box(house,0,.62,0,W-.25,.08,D-.25,tile);
+const groundY=.66, storyH=2.65, midY=groundY+storyH;
+// Ground floor rear and side walls; front is open except for entrance piers.
+box(house,0,groundY+storyH/2,-3.91,W,.22,storyH,plaster);
+box(house,-5.91,groundY+storyH/2,0,.22,storyH,D,plaster);
+box(house,5.91,groundY+storyH/2,0,.22,storyH,D,plaster);
+box(house,-5.55,groundY+storyH/2,3.9,.9,.22,storyH,plaster);
+box(house,5.55,groundY+storyH/2,3.9,.9,.22,storyH,plaster);
+box(house,0,groundY+storyH-.18,3.9,10.2,.28,.22,plaster);
+box(house,0,groundY+storyH/2,.15,.16,storyH,7.5,plasterDark);
+box(house,-2.7,groundY+storyH/2,-1.8,5.2,.14,.22,plasterDark);
+box(house,2.8,groundY+storyH/2,-1.8,5.1,.14,.22,plasterDark);
+
+// Upper floor slab and walls: open-front cutaway exposes both storeys.
+box(house,0,midY,0,12,.22,8,concrete);
+box(house,0,midY+.15,0,11.7,.08,7.7,M(0x9c8c78));
+const upperBase=midY+.2;
+box(house,0,upperBase+storyH/2,-3.9,12,.2,storyH,plaster);
+box(house,-5.9,upperBase+storyH/2,0,.2,storyH,8,plaster);
+box(house,5.9,upperBase+storyH/2,0,.2,storyH,8,plaster);
+box(house,-2.0,upperBase+storyH/2,-1.1,.14,storyH,5.4,plasterDark);
+box(house,2.2,upperBase+storyH/2,-1.1,.14,storyH,5.4,plasterDark);
+box(house,0,upperBase+storyH-.12,3.9,11.8,.24,.2,plaster);
+
+// Modern flat roof wings, parapets and a pitched central roof.
+box(house,0,upperBase+storyH+.05,0,12.4,.18,8.4,roofMat);
+box(house,0,upperBase+storyH+.18,-3.95,12.5,.42,.18,roofEdge);
+box(house,-6.05,upperBase+storyH+.18,0,.18,.42,8,roofEdge);
+box(house,6.05,upperBase+storyH+.18,0,.18,.42,8,roofEdge);
+const roofY=upperBase+storyH+.34;
+const roofA=box(house,0,roofY+.7,-.2,7.0,.18,5.0,roofMat);roofA.rotation.z=-.32;
+const roofB=box(house,0,roofY+.7,-.2,7.0,.18,5.0,roofMat);roofB.rotation.z=.32;
+for(let i=0;i<7;i++){let x=-3+i;let slat=box(house,x,roofY+.55,-.2,.035,.025,5.05,roofEdge,false);slat.rotation.z=0}
+box(house,0,roofY+1.2,-.2,.16,.18,5.15,roofEdge);
+
+// Windows: aluminium frames with glazing panes and mullions
+function windowUnit(parent,x,y,z,w,h,frontFace=true){
+ const frame=M(0x465864,.3,.75);
+ box(parent,x,y,z,w+.12,h+.12,.12,frame,false);
+ box(parent,x,y,z+(frontFace?.075:-.075),w,h,.025,glass,false);
+ box(parent,x,y,z,w,.055,.16,frame,false);box(parent,x,y,z,w,.055,.16,frame,false);
+ box(parent,x,y,z,.045,h,.16,frame,false);
+ box(parent,x,y,z,w,.035,.16,frame,false);
+}
+windowUnit(house,3.9,2.0,3.82,1.9,1.35);
+windowUnit(house,-2.0,4.55,3.82,2.3,1.3);
+windowUnit(house,2.5,4.55,3.82,2.3,1.3);
+windowUnit(house,-5.78,2.0,0,1.8,1.4,false);
+windowUnit(house,5.78,4.5,0,1.8,1.35,false);
+
+// Interior finishes and furniture with plausible room layout
+// Living room ground left
+box(house,-3.7,.94,-2.5,2.6,.48,1.15,M(0x6f8795));
+box(house,-3.7,1.22,-2.5,2.55,.12,1.08,M(0xc8c5b9));
+for(let x of [-4.7,-2.7])box(house,x,1.2,-2.5,.13,.55,1.12,M(0x536d7c));
+box(house,-3.6,.78,-.95,1.7,.35,.75,oak);
+box(house,-3.6,.98,-.95,1.72,.08,.76,glass,false);
+// Kitchen ground right
+for(let x of [2.2,3.25,4.3]){box(house,x,1.15,-2.8,.9,.85,.8,oak);box(house,x,1.61,-2.8,.94,.08,.85,plasterDark)}
+box(house,3.25,1.68,-2.8,3.2,.08,.95,M(0x333f47,.3,.35));
+box(house,4.7,1.2,-1.65,.55,.85,.55,metal);
+// Upper bedroom and study furniture
+box(house,-4.0,midY+.45,-2.4,2.7,.45,1.8,M(0x6b8192));
+box(house,-4.0,midY+.72,-2.4,2.65,.12,1.75,M(0xe0ddd3));
+box(house,3.8,midY+.55,-2.7,2.0,.8,.9,oak);
+box(house,3.8,midY+1.0,-2.7,2.0,.1,.9,plasterDark);
+box(house,0,midY+.18,1.8,2.0,.08,1.2,M(0x80684e));
+
+// Entrance porch and realistic hinged door
+const doorPivot=new THREE.Group();doorPivot.position.set(-5.45,.68,4.02);house.add(doorPivot);
+const doorMat=M(0x60412f,.52), doorInset=M(0x79553c,.48), handleMat=M(0xd4b26c,.25,.8);
+box(doorPivot,.59,1.12,0,1.18,2.24,.13,doorMat);
+for(let y of [.55,1.68])box(doorPivot,.59,y,.075,.86,.78,.035,doorInset,false);
+box(doorPivot,1.05,1.12,.12,.035,.48,.035,handleMat,false);
+for(let y of [.28,1.96]){box(doorPivot,.06,y,0,.08,.18,.18,metal,false)}
+// Door frame and threshold
+box(house,-4.85,1.85,4.03,1.35,.14,.2,plaster);
+box(house,-5.52,1.85,4.03,.14,2.5,.2,plaster);
+box(house,-4.18,1.85,4.03,.14,2.5,.2,plaster);
+box(house,-4.85,.72,4.12,1.38,.12,.48,concrete);
+
+// HC-SR04 module, mounted beside the doorway and aimed out into approach path
+const hcsr=new THREE.Group();hcsr.position.set(-5.65,1.58,4.28);house.add(hcsr);
+box(hcsr,0,0,0,.55,.34,.12,greenPCB);
+for(let x of [-.16,.16]){
+ const trans=cyl(hcsr,x,0,.12,.115,.12,metal,'z');
+ const inner=cyl(hcsr,x,0,.19,.072,.035,black,'z');
+ const ring=cyl(hcsr,x,0,.215,.045,.018,blue,'z');
+}
+const sensorLabel=label('HC-SR04 · FRONT-FACING',.48);sensorLabel.position.set(-.1,.55,.1);hcsr.add(sensorLabel);
+// small status LED and buzzer
+cyl(hcsr,.22,-.2,.02,.055,.08,red);
+cyl(hcsr,-.22,-.2,.02,.08,.09,black);
+
+// ESP32 board model: exactly four independent controller boards with visible headers/chips
+const nodeGroups=[];
+function makeESP(id,title,pos,kind){
+ const g=new THREE.Group();g.position.set(...pos);house.add(g);
+ // raised mounting base
+ box(g,0,-.16,0,1.55,.13,1.05,black);
+ for(let xx of [-.58,.58])for(let zz of [-.38,.38])cyl(g,xx,-.065,zz,.055,.12,gold);
+ box(g,0,0,0,1.38,.12,.9,greenPCB);
+ // USB connector and antenna end
+ box(g,.73,.02,0,.18,.17,.38,metal);
+ box(g,-.58,.08,0,.22,.07,.48,M(0x0b604e));
+ box(g,0,.11,0,.42,.11,.39,chip);
+ box(g,-.02,.18,0,.23,.04,.22,M(0x283442));
+ // pin headers along both edges
+ for(let i=0;i<12;i++){let x=-.52+i*.095;box(g,x,.13,-.39,.035,.13,.035,gold,false);box(g,x,.13,.39,.035,.13,.035,gold,false)}
+ const led=mesh(g,new THREE.SphereGeometry(.055,12,12),M(0x35e39a,.2),-.48,.19,-.2);
+ const tag=label(title,.62);tag.position.set(0,.92,0);g.add(tag);
+ if(kind==='door'){
+   // short wired link to ultrasonic module; sensor remains frame mounted
+   line(g,[[.55,.08,.2],[.85,.28,.4],[1.2,.3,.55]],0xdaa34e,.025);
+   // buzzer module
+   cyl(g,.45,.25,.22,.11,.13,black);
+ }
+ if(kind==='fire'){
+   // MQ-2 metal mesh can, six perforations, and separate flame module
+   cyl(g,-.83,.42,0,.23,.45,metal);
+   for(let a=0;a<10;a++){let ang=a*Math.PI/5;let dot=mesh(g,new THREE.SphereGeometry(.025,8,8),black,-.83+Math.cos(ang)*.19,.43,Math.sin(ang)*.19); }
+   box(g,.82,.25,.05,.32,.27,.28,black);
+   box(g,.82,.4,.05,.17,.08,.15,red);
+ }
+ if(kind==='rain'){
+   // rain sensor plate with exposed parallel conductive traces
+   box(g,1.05,.16,0,.9,.07,.78,black);
+   for(let i=0;i<7;i++)box(g,.75+i*.1,.205,0,.025,.015,.67,gold,false);
+   box(g,1.05,.24,-.42,.9,.06,.08,metal);
+ }
+ if(kind==='night'){
+   // generic dedicated night monitoring module, no unsupported sensor type asserted
+   box(g,.88,.28,0,.3,.32,.28,black);
+   cyl(g,.88,.47,.15,.105,.08,glass,'z');
+   cyl(g,.88,.47,.205,.06,.025,blue,'z');
+ }
+ nodeGroups.push({id,g,led});return g;
+}
+makeESP(1,'ESP32-01 · DOOR SECURITY',[-3.45,1.0,1.15],'door');
+makeESP(2,'ESP32-02 · SMOKE / FLAME',[3.7,1.0,-2.5],'fire');
+makeESP(3,'ESP32-03 · RAIN',[4.25,4.45,1.25],'rain');
+makeESP(4,'ESP32-04 · NIGHT SECURITY',[-3.7,4.45,-2.5],'night');
+
+// Rain sensor exposed on upper roof edge, connected by cable to ESP32-03
+const rainPlate=new THREE.Group();rainPlate.position.set(4.3,roofY+1.0,2.0);house.add(rainPlate);
+box(rainPlate,0,0,0,1.15,.09,.88,black);
+for(let i=0;i<8;i++)box(rainPlate,-.48+i*.135,.055,0,.035,.018,.72,gold,false);
+line(house,[[4.25,4.55,1.2],[4.45,5.1,1.5],[4.3,roofY+.98,2]],0xdaa34e,.025);
+
+// Raspberry Pi 4 Model B central communication hub with port stack and GPIO header
+const pi=new THREE.Group();pi.position.set(0,midY+.18,.1);house.add(pi);
+box(pi,0,0,0,2.0,.16,1.35,M(0x176a50,.55));
+box(pi,-.12,.11,0,.72,.12,.62,chip);
+box(pi,-.7,.12,-.15,.32,.18,.62,metal);
+box(pi,.82,.12,0,.28,.17,.5,metal);
+box(pi,.82,.12,.48,.22,.16,.22,metal);
+for(let i=0;i<20;i++)box(pi,-.55+i*.058,.16,-.55,.035,.09,.06,gold,false);
+const piTag=label('RASPBERRY PI 4 · CENTRAL MQTT HUB',.7);piTag.position.set(0,.82,0);pi.add(piTag);
+const piLed=mesh(pi,new THREE.SphereGeometry(.06,12,12),M(0x31d18a,.2),-.8,.2,-.4);
+
+// Signal paths are luminous curved lines, one independent route per ESP32.
+const routes=[
+ [[-3.45,1.65,1.15],[-2.4,3.2,1.0],[-.8,3.4,.5],[0,3.5,.1]],
+ [[3.7,1.65,-2.5],[2.5,3.0,-2.0],[1.1,3.3,-.8],[0,3.5,.1]],
+ [[4.25,5.1,1.25],[3.1,5.8,.8],[1.6,4.6,.3],[0,3.5,.1]],
+ [[-3.7,5.1,-2.5],[-2.4,5.9,-1.5],[-1.1,4.5,-.5],[0,3.5,.1]]
+];
+const signalLines=[];
+routes.forEach((pts,i)=>{
+ const curve=new THREE.CatmullRomCurve3(pts.map(p=>new THREE.Vector3(...p)));
+ const tube=mesh(scene,new THREE.TubeGeometry(curve,64,.018,8,false),new THREE.MeshBasicMaterial({color:0x48bfff,transparent:true,opacity:.58}),0,0,0,false);
+ signalLines.push({curve,tube});
+});
+const packets=[];
+for(let i=0;i<16;i++){const p=mesh(scene,new THREE.SphereGeometry(.065,12,12),new THREE.MeshBasicMaterial({color:0x74d4ff}),0,0,0,false);packets.push(p)}
+
+// Approaching visitor, walking toward the actual sensor/door axis
+const visitor=new THREE.Group();plot.add(visitor);visitor.position.set(-5.65,0,7.2);
+const bodyMat=M(0x345a7d,.7),skin=M(0xc99572,.8);
+cyl(visitor,0,1.05,0,.24,1.05,bodyMat);
+mesh(visitor,new THREE.SphereGeometry(.22,18,18),skin,0,1.72,0);
+box(visitor,-.13,.43,0,.15,.72,black);box(visitor,.13,.43,0,.15,.72,black);
+visitor.visible=false;
+
+// Landscaping, path, shrubs, lamps and boundary
+box(plot,-5.7,.18,6.0,1.1,.08,3.5,concrete);
+for(let i=0;i<7;i++){
+ const x=-8+i*2.65;
+ const shrub=mesh(plot,new THREE.IcosahedronGeometry(.32,1),M(0x2f7953),x,.38,5.8);
+ shrub.scale.set(1.2,.7,1.0);
+}
+for(let x of [-8.2,8.2])for(let z of [-5.5,5.5]){
+ cyl(plot,x,.7,z,.09,1.4,wood);
+ mesh(plot,new THREE.IcosahedronGeometry(.75,1),M(0x34724e),x,1.65,z);
+}
+for(let x=-8;x<=8;x+=1){box(plot,x,.18,-6.8,.06,.25,.06,metal,false)}
+
+// Rain drops and animated event particles
+const drops=[];
+for(let i=0;i<110;i++){const d=mesh(scene,new THREE.SphereGeometry(.025,6,6),new THREE.MeshBasicMaterial({color:0x82d5ff}),0,0,0,false);d.position.set((Math.random()-.5)*18,Math.random()*10+2,(Math.random()-.5)*15);drops.push(d)}
+let night=false,events={door:false,fire:false,flame:false,rain:false,night:false},start=performance.now(),doorAngle=0,doorTarget=0,visitorProgress=0;
+function logEvent(msg,type=''){const d=document.createElement('div');d.className='event '+type;d.innerHTML='<time>'+new Date().toLocaleTimeString()+'</time>'+msg;const l=document.querySelector('#log');l.prepend(d);while(l.children.length>18)l.lastChild.remove();document.querySelector('#lastmsg').textContent=msg.split(' ')[0].toUpperCase().slice(0,13)}
+function refreshUI(){
+ const active=Object.values(events).filter(Boolean).length;
+ document.querySelector('#alertcount').textContent=active;
+ document.querySelector('#alertnote').textContent=active?'Event(s) active':'No critical events';
+ const states={door:events.door?'INTRUSION ALERT':'SAFE',fire:events.fire?'SMOKE DETECTED':'NORMAL',rain:events.rain?'RAIN DETECTED':'DRY',night:events.night?'ACTIVITY DETECTED':'MONITORING'};
+ for(const k of Object.keys(states)){const el=document.querySelector('#s-'+k);el.textContent=states[k];el.className='state'+(events[k]?' alert':'')}
+ document.querySelector('#gas').textContent=events.fire?'2680':'420';
+ document.querySelector('#flame').textContent=events.flame?'DETECTED':'CLEAR';
+ document.querySelector('#rainval').textContent=events.rain?'WET · 86%':'DRY · 0%';
+ document.querySelector('#activity').textContent=events.night?'DETECTED':'NONE';
+ document.querySelector('#distance').textContent=events.door?'24 cm':Math.round(90+Math.random()*35)+' cm';
+ nodeGroups.forEach(n=>{const hot=(n.id===1&&events.door)||(n.id===2&&(events.fire||events.flame))||(n.id===3&&events.rain)||(n.id===4&&events.night);n.led.material.color.setHex(hot?0xff5f67:0x31d18a)});
+ piLed.material.color.setHex(active?0xf4c44e:0x31d18a);
+}
+window.trigger=(kind)=>{
+ if(kind==='clear'){events={door:false,fire:false,flame:false,rain:false,night:false};visitor.visible=false;visitorProgress=0;doorTarget=0;logEvent('All subsystem test events cleared · system returned to normal')}
+ else{
+   events[kind]=!events[kind];
+   if(kind==='door'){visitor.visible=events.door;visitorProgress=events.door?1:0;doorTarget=events.door?-.95:0}
+   const names={door:'HC-SR04 measured approaching object · entrance warning published',fire:'MQ-2 gas threshold exceeded · smoke warning published',flame:'Flame sensor asserted · critical alert published',rain:'Rain sensor changed from dry to wet · environmental alert published',night:'Night-security node reported suspicious activity'};
+   logEvent(names[kind],kind==='fire'||kind==='flame'?'alert':'warn');
+ }
+ refreshUI();
+};
+window.toggleNight=()=>{
+ night=!night;scene.background.setHex(night?0x020713:0x081522);scene.fog.color.copy(scene.background);
+ sun.intensity=night?.32:3.4;fill.intensity=night?2.5:1.5;interiorLight.intensity=night?48:30;
+ logEvent(night?'Night-time monitoring scene enabled':'Daylight scene restored');
+};
+
+// A guided cinematic camera drift; orbit controls remain user-operable.
+let lastFrame=0;
+function animate(t){
+ requestAnimationFrame(animate);const sec=t/1000;controls.update();
+ doorAngle=THREE.MathUtils.damp(doorAngle,doorTarget,3.2,1/60);doorPivot.rotation.y=doorAngle;
+ if(visitor.visible){visitor.position.z=THREE.MathUtils.damp(visitor.position.z,4.52,1.4,1/60)}
+ drops.forEach(d=>{d.visible=events.rain;if(events.rain){d.position.y-=.15;if(d.position.y<.15){d.position.y=10+Math.random()*3;d.position.x=(Math.random()-.5)*18;d.position.z=(Math.random()-.5)*15}}});
+ packets.forEach((p,i)=>{const lane=i%4,phase=(sec*.26+i*.13)%1;p.position.copy(signalLines[lane].curve.getPoint(phase));p.visible=true});
+ signalLines.forEach((r,i)=>{r.tube.material.opacity=.38+.22*Math.sin(sec*2+i)});
+ // Subtle showcase orbit without overriding manual orbit
+ if(t-lastFrame>500){document.querySelector('#clock').textContent=new Date().toLocaleTimeString();document.querySelector('#uptime').textContent=new Date(Math.max(0,t-start)).toISOString().slice(14,19);lastFrame=t}
+ renderer.render(scene,camera);
+}
+new ResizeObserver(()=>{const w=canvas.clientWidth,h=canvas.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false)}).observe(canvas);
+refreshUI();logEvent('Four ESP32 controllers online · Raspberry Pi 4 MQTT hub connected');animate(0);
+</script>
+</body></html>
